@@ -8,16 +8,15 @@ namespace ITP104PROJECT
     public partial class Departments : Form
     {
         //public static string connection = "server=localhost; user=root; password=; database=company; port=3306";
-        //public static string connection = "server=localhost; user=root; password=liezel11; database=company;";
-        public static string connection = "server=localhost; user=root; password=091203; database=company";
+        public static string connection = "server=localhost; user=root; password=liezel11; database=company;";
+        //public static string connection = "server=localhost; user=root; password=091203; database=company";
         public MySqlConnection conn;
-        public Admin _admin = new Admin();
+        public Admin _admin;
 
         public Departments()
         {
             InitializeComponent();
             conn = new MySqlConnection(connection);
-            //lblName.Text = string.IsNullOrEmpty(admin.name) ? "Welcome!" : admin.name;
             btnDashboard.Click += new EventHandler(btnSide_Click);
             btnSideDep.Click += new EventHandler(btnSide_Click);
             btnSideEmp.Click += new EventHandler(btnSide_Click);
@@ -33,7 +32,10 @@ namespace ITP104PROJECT
 
         private void Departments_Load(object sender, EventArgs e)
         {
-            lblName.Text = _admin.name ;
+            if (_admin != null)
+            {
+                lblName.Text = _admin.name;
+            }
         }
 
         private void btnSide_Click(object sender, EventArgs e)
@@ -42,60 +44,49 @@ namespace ITP104PROJECT
 
             if (clickedButton != null)
             {
-                if (clickedButton.Name == "btnDashboard")
+                switch (clickedButton.Name)
                 {
-                    Dashboard dashboardForm = new Dashboard(_admin);
-                    dashboardForm.Show();
-                    this.Hide();
-                }
-                else if (clickedButton.Name == "btnSideDep")
-                {
-                    Departments departmentsForm = new Departments(_admin);
-                    departmentsForm.Show();
-                    this.Hide();
-                }
-                else if (clickedButton.Name == "btnSideEmp")
-                {
-                    Employees employeesForm = new Employees(_admin);
-                    employeesForm.Show();
-                    this.Hide();
-                }
-                else if (clickedButton.Name == "btnSideProj")
-                {
-                    Project projectForm = new Project(_admin);
-                    projectForm.Show();
-                    this.Hide();
-                }
-                else if (clickedButton.Name == "btnSettings")
-                {
-                    Settings settingsForm = new Settings(_admin);
-                    settingsForm.Show();
-                    this.Hide();
-                }
-                else if (clickedButton.Name == "btnLogout")
-                {
-                    var result = MessageBox.Show("Are you sure you want to log out?", "Logout", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                    if (result == DialogResult.Yes)
-                    {
-
-                        MessageBox.Show("You are now logging out. Please wait...",
-                                 "Logging Out",
-                                 MessageBoxButtons.OK,
-                                 MessageBoxIcon.Information);
-
+                    case "btnDashboard":
                         this.Hide();
+                        Dashboard dashboardForm = new Dashboard(_admin);
+                        dashboardForm.Show();
+                        break;
+                    case "btnSideDep":
+                        MessageBox.Show("You are already on the Departments Form.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                        break;
+                    case "btnSideEmp":
+                        this.Hide();
+                        Employees employeesForm = new Employees(_admin);
+                        employeesForm.Show();
+                        break;
+                    case "btnSideProj":
+                        this.Hide();
+                        Project projectForm = new Project(_admin);
+                        projectForm.Show();
+                        break;
 
-                        Login loginForm = new Login(_admin);
-                        loginForm.Show();
-                    }
+                    case "btnSettings":
+                        this.Hide();
+                        Settings settingsForm = new Settings(_admin);
+                        settingsForm.Show();
+                        this.Hide();
+                        break;
 
+                    case "btnLogout":
+                        var result = MessageBox.Show("Are you sure you want to log out?", "Logout", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                        if (result == DialogResult.Yes)
+                        {
+                            MessageBox.Show("Logging out...", "Logout", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            this.Hide();
+                            Login loginForm = new Login(_admin);
+                            loginForm.Show();
+                        }
+                        break;
                 }
-
-
             }
         }
-
 
         private void btnView_Click(object sender, EventArgs e)
         {
@@ -172,8 +163,6 @@ namespace ITP104PROJECT
             }
         }
  
-
-
         private void AddingDepartment()
         {
             string depName = txtDepName.Text.Trim();
@@ -200,7 +189,13 @@ namespace ITP104PROJECT
                 command.Parameters.AddWithValue("@name", depName);
                 command.Parameters.AddWithValue("@description", depDescription);
 
+               
                 command.ExecuteNonQuery();
+                MessageBox.Show("Department added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                depName = string.Empty;
+                depDescription = string.Empty;
+
             }
             catch (Exception ex)
             {
@@ -246,7 +241,6 @@ namespace ITP104PROJECT
                 command.ExecuteNonQuery();
 
                 MessageBox.Show("Department deleted successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                ViewDepartments("Department list updated after deletion.");
 
             }
             catch (Exception ex)

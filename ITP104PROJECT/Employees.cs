@@ -16,9 +16,9 @@ namespace ITP104PROJECT
     {
 
         public Admin _admin;
-        //public static string connection = "server=localhost; user=root; password=liezel11; database=company;";
+        public static string connection = "server=localhost; user=root; password=liezel11; database=company;";
         //public static string connection = "server=localhost; user=root; password=091203; database=company";
-        public static string connection = "server=localhost; user=root; password=; database=company; port=3306";
+        //public static string connection = "server=localhost; user=root; password=; database=company; port=3306";
         public MySqlConnection conn;
         public Employees()
         {
@@ -41,57 +41,47 @@ namespace ITP104PROJECT
 
             if (clickedButton != null)
             {
-                if (clickedButton.Name == "btnDashboard")
+                switch (clickedButton.Name)
                 {
-                    Dashboard dashboardForm = new Dashboard(_admin);
-                    dashboardForm.Show();
-                    this.Hide();
-                }
-                else if (clickedButton.Name == "btnSideDep")
-                {
-                    Departments departmentsForm = new Departments(_admin);
-                    departmentsForm.Show();
-                    this.Hide();
-                }
-                else if (clickedButton.Name == "btnSideEmp")
-                {
-                    Employees employeesForm = new Employees(_admin);
-                    employeesForm.Show();
-                    this.Hide();
-                }
-                else if (clickedButton.Name == "btnSideProj")
-                {
-                    Project projectForm = new Project(_admin);
-                    projectForm.Show();
-                    this.Hide();
-                }
-                else if (clickedButton.Name == "btnSettings")
-                {
-                    Settings settingsForm = new Settings(_admin);
-                    settingsForm.Show();
-                    this.Hide();
-                }
-                else if (clickedButton.Name == "btnLogout")
-                {
-                    var result = MessageBox.Show("Are you sure you want to log out?", "Logout", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                    if (result == DialogResult.Yes)
-                    {
-
-                        MessageBox.Show("You are now logging out. Please wait...",
-                                 "Logging Out",
-                                 MessageBoxButtons.OK,
-                                 MessageBoxIcon.Information);
-
+                    case "btnDashboard":
                         this.Hide();
+                        Dashboard dashboardForm = new Dashboard(_admin);
+                        dashboardForm.Show();
+                        break;
+                    case "btnSideDep":
+                        this.Hide();
+                        Departments departmentsForm = new Departments(_admin);
+                        departmentsForm.Show();
+                        break;
+                    case "btnSideEmp":
+                        MessageBox.Show("You are already on the Employee Form.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                         break;
+                    case "btnSideProj":
+                        this.Hide();
+                        Project projectForm = new Project(_admin);
+                        projectForm.Show();
+                        break;
 
-                        Login loginForm = new Login(_admin);
-                        loginForm.Show();
-                    }
+                    case "btnSettings":
+                        this.Hide();
+                        Settings settingsForm = new Settings(_admin);
+                        settingsForm.Show();
+                        break;
 
+                    case "btnLogout":
+                        var result = MessageBox.Show("Are you sure you want to log out?", "Logout", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                        if (result == DialogResult.Yes)
+                        {
+                            MessageBox.Show("Logging out...", "Logout", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            this.Hide();
+                            Login loginForm = new Login(_admin);
+                            loginForm.Show();
+                        }
+                        break;
                 }
             }
-         }
+        }
 
      
 
@@ -99,6 +89,11 @@ namespace ITP104PROJECT
         {
             PopulateDepartmentComboBox();
             PopulateGenderComboBox();
+
+            if (_admin != null)
+            {
+                lblName.Text = _admin.name;
+            }
         }
 
         private void PopulateDepartmentComboBox()
@@ -178,6 +173,7 @@ namespace ITP104PROJECT
 
         private void ViewEmployees(String message)
         {
+            conn.Close();
             dgvEmployees.Rows.Clear();
 
             dgvEmployees.ColumnCount = 9;
@@ -300,10 +296,14 @@ namespace ITP104PROJECT
             string empEmail = txtEmpEmail.Text.Trim();
             string empPosition = txtEmpPosition.Text.Trim();
             string empGender = cmbGender.SelectedIndex.ToString();
+            string depId = GetSelectedDepartmentId();
             string empSalary = txtEmpSalary.Text.Trim();
+            DateTime dateHired = dateHiredPicker.Value;
+
 
             if (!ValidateEmployeeInput(empName, empAddress, empAge, empEmail, empPosition, empGender, empSalary))
             {
+                MessageBox.Show("Please fill in all required fields correctly.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -313,22 +313,19 @@ namespace ITP104PROJECT
                 return;
             }
 
-            
-            string depId = GetSelectedDepartmentId();
 
             if (string.IsNullOrEmpty(depId))
             {
                 MessageBox.Show("Please select a department for the employee.", "Input Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return; // Prevent adding the employee if no department is selected
+                return; 
             }
 
             try
             {
                 conn.Open();
 
-                // Insert employee data into the database
-                string query = "INSERT INTO employee (employeeName, address, age, email, position, gender, salary, departmentId) " +
-                               "VALUES (@name, @address, @age, @email, @position, @gender, @salary, @departmentId)";
+                string query = "INSERT INTO employee (employeeName, address, age, email, position, gender, salary,dateHired,departmentId) " +
+                               "VALUES (@name, @address, @age, @email, @position, @gender, @salary, @dateHired, @departmentId)";
 
                 MySqlCommand command = new MySqlCommand(query, conn);
                 command.Parameters.AddWithValue("@name", empName);
@@ -338,10 +335,21 @@ namespace ITP104PROJECT
                 command.Parameters.AddWithValue("@position", empPosition);
                 command.Parameters.AddWithValue("@gender", empGender);
                 command.Parameters.AddWithValue("@salary", empSalary);
+                command.Parameters.AddWithValue("@dateHired", dateHired);
                 command.Parameters.AddWithValue("@departmentId", depId); 
 
                 command.ExecuteNonQuery();
                 MessageBox.Show("Employee added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                txtEmpName.Text = string.Empty;
+                txtEmpAddress.Text = string.Empty;
+                txtEmpAge.Text = string.Empty;
+                txtEmpEmail.Text = string.Empty;
+                txtEmpPosition.Text = string.Empty;
+                txtEmpSalary.Text = string.Empty;
+                cmbGender.SelectedIndex = -1;
+                dateHiredPicker.Value = DateTime.Now;
+                comboEmpDep.SelectedIndex = -1;
+
             }
             catch (Exception ex)
             {
@@ -349,7 +357,10 @@ namespace ITP104PROJECT
             }
             finally
             {
-                conn.Close();
+                if (conn.State == ConnectionState.Open)
+                {
+                    conn.Close();
+                }
             }
         }
 
@@ -381,8 +392,7 @@ namespace ITP104PROJECT
                 command.Parameters.AddWithValue("@id", empId);
                 command.ExecuteNonQuery();
                 MessageBox.Show("Employee deleted successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                ViewEmployees("Employee list updated after deletion.");
-
+             
 
             }
             catch (Exception ex)
@@ -554,11 +564,13 @@ namespace ITP104PROJECT
         private void btnAddEmployees_Click(object sender, EventArgs e)
         {
             AddingEmployee();
+            ViewEmployees(" ");
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
             DeletingEmployee();
+            ViewEmployees(" ");
         }
 
         private void btnUpdateEmployee_Click(object sender, EventArgs e)
@@ -646,6 +658,7 @@ namespace ITP104PROJECT
                 }
             }
         }
+
     }
 }
      

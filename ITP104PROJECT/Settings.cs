@@ -43,8 +43,6 @@ namespace ITP104PROJECT
             {
                 MessageBox.Show("Error: Admin object is null. Returning to Dashboard.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            _admin = admin;
         }
 
         private void btnSide_Click(object sender, EventArgs e)
@@ -53,51 +51,44 @@ namespace ITP104PROJECT
 
             if (clickedButton != null)
             {
-                if (clickedButton.Name == "btnDashboard")
+                switch (clickedButton.Name)
                 {
-                    Dashboard dashboardForm = new Dashboard(_admin);
-                    dashboardForm.Show();
-                    this.Hide();
-                }
-                else if (clickedButton.Name == "btnSideDep")
-                {
-                    Departments departmentsForm = new Departments(_admin);
-                    departmentsForm.Show();
-                    this.Hide();
-                }
-                else if (clickedButton.Name == "btnSideEmp")
-                {
-                    Employees employeesForm = new Employees(_admin);
-                    employeesForm.Show();
-                    this.Hide();
-                }
-                else if (clickedButton.Name == "btnSideProj")
-                {
-                    Project projectForm = new Project(_admin);
-                    projectForm.Show();
-                    this.Hide();
-                }
-                else if (clickedButton.Name == "btnSettings")
-                {
-                    Settings settingsForm = new Settings(_admin);
-                    settingsForm.Show();
-                    this.Hide();
-                }
-                else if (clickedButton.Name == "btnLogout")
-                {
-                    var result = MessageBox.Show("Are you sure you want to log out?", "Logout", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                    if (result == DialogResult.Yes)
-                    {
-
-                        MessageBox.Show("You are now logging out. Please wait...",
-                                 "Logging Out",
-                                 MessageBoxButtons.OK,
-                                 MessageBoxIcon.Information);
+                    case "btnDashboard":
                         this.Hide();
-                        Login login = new Login(_admin);
-                        login.Show();
-                    }
+                        Dashboard dashboardForm = new Dashboard(_admin);
+                        dashboardForm.Show();
+                        break;
+                    case "btnSideDep":
+                        this.Hide();
+                        Departments departmentsForm = new Departments(_admin);
+                        departmentsForm.Show();
+
+                        break;
+                    case "btnSideEmp":
+                        this.Hide();
+                        Employees employeesForm = new Employees(_admin);
+                        employeesForm.Show();
+                        break;
+                    case "btnSideProj":
+                        this.Hide();
+                        Project projectForm = new Project(_admin);
+                        projectForm.Show();
+                        break;
+                    case "btnSettings":
+                        MessageBox.Show("You are already on the Settings Form.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        break;
+
+                    case "btnLogout":
+                        var result = MessageBox.Show("Are you sure you want to log out?", "Logout", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                        if (result == DialogResult.Yes)
+                        {
+                            MessageBox.Show("Logging out...", "Logout", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            this.Hide();
+                            Login loginForm = new Login(_admin);
+                            loginForm.Show();
+                        }
+                        break;
                 }
             }
         }
@@ -185,28 +176,6 @@ namespace ITP104PROJECT
             }
         }
         
-        //private void btnBackup_Click(object sender, EventArgs e)
-        //{
-            
-            
-
-
-            //try
-            //{
-            //    if (string.IsNullOrEmpty(txtBackPath.Text))
-            //    {
-            //        MessageBox.Show("Please select a backup path.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //        return;
-            //    }
-
-            //    string backupPath = txtBackPath.Text;
-            //    string query = (" '"+txtBackPath.Text+"'");
-            //    MessageBox.Show("Backup Done Successfully!");
-
-            //    // Assuming DB_General is correctly implemented
-            //    DB_General obj = new DB_General();
-            //    obj.general_query(query);
-
         private void btnBackup_Click(object sender, EventArgs e)
         {
             using (SaveFileDialog sfd = new SaveFileDialog())
@@ -294,6 +263,11 @@ namespace ITP104PROJECT
         private void Settings_Load(object sender, EventArgs e)
         {
             LoadAdminDetails();
+
+            if (_admin != null)
+            {
+                lblName.Text = _admin.name;
+            }
         }
 
         private void LoadAdminDetails()
@@ -315,6 +289,5 @@ namespace ITP104PROJECT
 
             dgvAdmin.DataSource = dt;
         }
-
     }
 }

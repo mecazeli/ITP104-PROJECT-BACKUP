@@ -76,7 +76,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblProjects.AutoSize = true;
             this.lblProjects.Font = new System.Drawing.Font("Trebuchet MS", 15F, System.Drawing.FontStyle.Bold);
-            this.lblProjects.Location = new System.Drawing.Point(872, 423);
+            this.lblProjects.Location = new System.Drawing.Point(788, 417);
             this.lblProjects.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblProjects.Name = "lblProjects";
             this.lblProjects.Size = new System.Drawing.Size(90, 26);
@@ -89,7 +89,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblEmployees.AutoSize = true;
             this.lblEmployees.Font = new System.Drawing.Font("Trebuchet MS", 15F, System.Drawing.FontStyle.Bold);
-            this.lblEmployees.Location = new System.Drawing.Point(568, 423);
+            this.lblEmployees.Location = new System.Drawing.Point(484, 417);
             this.lblEmployees.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblEmployees.Name = "lblEmployees";
             this.lblEmployees.Size = new System.Drawing.Size(113, 26);
@@ -102,7 +102,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblDepartments.AutoSize = true;
             this.lblDepartments.Font = new System.Drawing.Font("Trebuchet MS", 15F, System.Drawing.FontStyle.Bold);
-            this.lblDepartments.Location = new System.Drawing.Point(265, 423);
+            this.lblDepartments.Location = new System.Drawing.Point(181, 417);
             this.lblDepartments.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblDepartments.Name = "lblDepartments";
             this.lblDepartments.Size = new System.Drawing.Size(135, 26);
@@ -212,7 +212,7 @@
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Trebuchet MS", 10F, System.Drawing.FontStyle.Bold);
             this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(76, 176);
+            this.label1.Location = new System.Drawing.Point(70, 176);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(49, 18);
@@ -274,7 +274,6 @@
             this.btnSideEmp.TabIndex = 22;
             this.btnSideEmp.Text = "Employees";
             this.btnSideEmp.UseVisualStyleBackColor = true;
-            this.btnSideEmp.Click += new System.EventHandler(this.btnEmployees_Click);
             // 
             // btnSideDep
             // 
@@ -310,7 +309,7 @@
             this.lblName.AutoSize = true;
             this.lblName.Font = new System.Drawing.Font("Trebuchet MS", 11F, System.Drawing.FontStyle.Bold);
             this.lblName.ForeColor = System.Drawing.Color.White;
-            this.lblName.Location = new System.Drawing.Point(49, 158);
+            this.lblName.Location = new System.Drawing.Point(39, 156);
             this.lblName.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblName.Name = "lblName";
             this.lblName.Size = new System.Drawing.Size(111, 20);
@@ -340,6 +339,7 @@
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Dashboard";
+            this.Load += new System.EventHandler(this.Dashboard_Load);
             this.panelDasboard.ResumeLayout(false);
             this.panelDasboard.PerformLayout();
             this.panel2.ResumeLayout(false);

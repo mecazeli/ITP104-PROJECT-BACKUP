@@ -44,25 +44,25 @@ namespace ITP104PROJECT
                         break;
                        
                     case "btnSideDep":
+                        this.Hide();
                         Departments departmentsForm = new Departments(_admin);
                         departmentsForm.Show();
-                        this.Hide();
                         break;
                     case "btnSideEmp":
+                        this.Hide();
                         Employees employeesForm = new Employees(_admin);
                         employeesForm.Show();
-                        this.Hide();
                         break;
                     case "btnSideProj":
+                        this.Hide();
                         Project projectForm = new Project(_admin);
                         projectForm.Show();
-                        this.Hide();
                         break;
 
                     case "btnSettings":
+                        this.Hide();
                         Settings settingsForm = new Settings(_admin);
                         settingsForm.Show();
-                        this.Hide();
                         break;
 
                     case "btnLogout":
@@ -99,6 +99,15 @@ namespace ITP104PROJECT
             Project projectForm = new Project(_admin);
             this.Hide();
             projectForm.Show();
+        }
+
+        private void Dashboard_Load(object sender, EventArgs e)
+        {
+           if(_admin != null)
+            {
+                lblName.Text = _admin.name;
+            }
+          
         }
     }
 }
