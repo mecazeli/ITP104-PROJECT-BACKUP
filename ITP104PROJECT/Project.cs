@@ -202,12 +202,12 @@ namespace ITP104PROJECT
         }
 
 
-        private void ViewProjectAndTasks()
+        public void ViewProjectAndTasks()
         {;
             dgvProject.Rows.Clear();
             dgvProject.Columns.Clear();
 
-            dgvProject.ColumnCount = 7;
+            dgvProject.ColumnCount = 8;
             dgvProject.Columns[0].Name = "Project ID";
             dgvProject.Columns[1].Name = "Project Name";
             dgvProject.Columns[2].Name = "Project Start Date";
@@ -215,6 +215,7 @@ namespace ITP104PROJECT
             dgvProject.Columns[4].Name = "Task ID";
             dgvProject.Columns[5].Name = "Task Name";
             dgvProject.Columns[6].Name = "Employee ID";
+            dgvProject.Columns[7].Name = "Department Name";
 
             DataGridViewComboBoxColumn statusColumn = new DataGridViewComboBoxColumn();
             statusColumn.Name = "Project Status";
@@ -238,11 +239,14 @@ namespace ITP104PROJECT
                 t.taskId,
                 t.taskName,
                 t.employeeId,
+                d.departmentName,
                 p.status AS projectStatus
             FROM 
                 project p
             LEFT JOIN 
                 task t ON p.projectId = t.projectId;
+             LEFT JOIN 
+            department d ON p.departmentId = d.departmentId;
            ";
 
               
@@ -266,7 +270,9 @@ namespace ITP104PROJECT
                             row["ProjectEndDate"],
                             row["taskId"] != DBNull.Value ? row["taskId"] : null,
                             row["taskName"] != DBNull.Value ? row["taskName"] : null,
-                            row["employeeId"] != DBNull.Value ? row["employeeId"] : null
+                            row["employeeId"] != DBNull.Value ? row["employeeId"] : null,
+                             row["departmentName"] != DBNull.Value ? row["departmentName"] : "No Department"
+
                         );
 
                        
@@ -471,7 +477,8 @@ namespace ITP104PROJECT
 
         private void btnUpdateProject_Click(object sender, EventArgs e)
         {
-
+            updateProject updateForm = new updateProject(this);
+            updateForm.ShowDialog();
         }
 
 
@@ -542,17 +549,20 @@ namespace ITP104PROJECT
 
         private void DeleteTask()
         {
-            
+
+          
             if (dgvProject.SelectedCells.Count == 0)
             {
                 MessageBox.Show("Please select a task to delete.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-          
+           
             int selectedRowCell = dgvProject.SelectedCells[0].RowIndex;
             DataGridViewRow selectedRow = dgvProject.Rows[selectedRowCell];
-            string taskId = selectedRow.Cells[3].Value?.ToString(); 
+
+           
+            string taskId = selectedRow.Cells["Task ID"].Value?.ToString(); 
             if (string.IsNullOrEmpty(taskId))
             {
                 MessageBox.Show("Invalid task selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -561,22 +571,26 @@ namespace ITP104PROJECT
 
             try
             {
+                
                 conn.Open();
 
-             
-                string query = "DELETE FROM task WHERE taskId = @id";
-                MySqlCommand command = new MySqlCommand(query, conn);
-
               
-                command.Parameters.AddWithValue("@id", taskId);
+                string query = "DELETE FROM task WHERE taskId = @taskId";
+                MySqlCommand command = new MySqlCommand(query, conn);
+                command.Parameters.AddWithValue("@taskId", taskId);
 
-             
                 int rowsAffected = command.ExecuteNonQuery();
 
-              
+                
                 if (rowsAffected > 0)
                 {
-                    MessageBox.Show("Task deleted successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                   
+                    selectedRow.Cells["Task Name"].Value = null; 
+                    selectedRow.Cells["Employee ID"].Value = null; 
+                    selectedRow.Cells["Project Status"].Value = null; 
+                    selectedRow.Cells["Task ID"].Value = "Deleted"; 
+
+                    MessageBox.Show("Task deleted successfully from the database!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
