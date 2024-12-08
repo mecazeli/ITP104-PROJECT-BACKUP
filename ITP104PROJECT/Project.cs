@@ -323,7 +323,7 @@ namespace ITP104PROJECT
                 MySqlCommand command = new MySqlCommand(query, conn);
 
                 command.Parameters.AddWithValue("@projectName", projName);
-                command.Parameters.AddWithValue("@departmetnId", selectedDepId);
+                command.Parameters.AddWithValue("@departmentId", selectedDepId);
                 command.Parameters.AddWithValue("@startDate", DateTime.Now);
                 command.Parameters.AddWithValue("@endDate", targetDate);
 
@@ -351,49 +351,54 @@ namespace ITP104PROJECT
 
         private void DeleteProject()
         {
-            if(dgvProject.SelectedCells.Count == 0)
+            if (dgvProject.SelectedCells.Count == 0)
             {
-                if (dgvProject.SelectedCells.Count == 0)
+                MessageBox.Show("Please select a project to delete.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            int selectedRowCell = dgvProject.SelectedCells[0].RowIndex;
+            DataGridViewRow selectedRow = dgvProject.Rows[selectedRowCell];
+            string projectId = selectedRow.Cells[0].Value?.ToString(); // Change index if `projectId` is not in the first column
+
+            if (string.IsNullOrEmpty(projectId))
+            {
+                MessageBox.Show("Invalid project selected. Make sure the project ID exists.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                conn.Open();
+
+                string query = "DELETE FROM project WHERE projectId = @id";
+                MySqlCommand command = new MySqlCommand(query, conn);
+
+                command.Parameters.AddWithValue("@id", projectId);
+                int rowsAffected = command.ExecuteNonQuery();
+
+                if (rowsAffected > 0)
                 {
-                    MessageBox.Show("Please select a project to delete.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                int selectedRowCell = dgvProject.SelectedCells[0].RowIndex;
-                DataGridViewRow selectedRow = dgvProject.Rows[selectedRowCell];
-                string projectId = selectedRow.Cells[0].Value?.ToString();
-
-                if (string.IsNullOrEmpty(projectId))
-                {
-                    MessageBox.Show("Invalid project selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                try
-                {
-                    conn.Open();
-
-                    string query = "DELETE FROM project WHERE projectId = @id";
-                    MySqlCommand command = new MySqlCommand(query, conn);
-
-                    command.Parameters.AddWithValue("@id", projectId);
-                    command.ExecuteNonQuery();
-
                     MessageBox.Show("Project deleted successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                catch (Exception ex)
+                else
                 {
-                    MessageBox.Show("An error occurred: " + ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("No matching project found to delete. Please verify the selection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
-                finally
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred: " + ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                if (conn.State == ConnectionState.Open)
                 {
-                    if (conn.State == ConnectionState.Open)
-                    {
-                        conn.Close();
-                    }
+                    conn.Close();
                 }
             }
         }
+
         private void UpdateProject()
         {
 
@@ -478,44 +483,47 @@ namespace ITP104PROJECT
             string selectedEmpId = GetSelectedEmployeeId();
             string selectedProjectId = GetSelectedProjectId();
             DateTime taskTargetTime = taskTargetDate.Value;
-      
 
-
-            if (string.IsNullOrEmpty(taskName) || string.IsNullOrEmpty(selectedEmpId))
+            if (string.IsNullOrEmpty(taskName) || string.IsNullOrEmpty(selectedEmpId) || string.IsNullOrEmpty(selectedProjectId))
             {
-                MessageBox.Show("Please fill in all required fields.", "Validation Error",MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Please fill in all required fields.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            if(IsTaskNameExits(taskName))
+            if (IsTaskNameExits(taskName))
             {
                 MessageBox.Show("Task name already exists. Please choose a different name.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+
+            if (!IsProjectValid(selectedProjectId))
+            {
+                MessageBox.Show("The selected project is either completed or does not exist.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             try
             {
                 conn.Open();
 
-                string query = @" 
-                       INSERT INTO task (taskName, employeeId,projectId, targetDate, status)
-                       VALUES (@taskName, @employeeId,@projectId, @targetDate, 'Pending');
-                       ";
+                string query = @"
+                   INSERT INTO task (taskName, employeeId, projectId, deadline)
+                   VALUES (@taskName, @employeeId, @projectId, @deadline);";
 
                 MySqlCommand command = new MySqlCommand(query, conn);
 
                 command.Parameters.AddWithValue("@taskName", taskName);
                 command.Parameters.AddWithValue("@employeeId", selectedEmpId);
                 command.Parameters.AddWithValue("@projectId", selectedProjectId);
-                command.Parameters.AddWithValue("@targetDate", taskTargetTime);
+                command.Parameters.AddWithValue("@deadline", taskTargetTime);
 
                 command.ExecuteNonQuery();
+
                 MessageBox.Show("Task added successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-       
 
                 txtTask.Text = string.Empty;
                 cbEmployee.SelectedIndex = -1;
                 taskTargetDate.Value = DateTime.Now;
-
             }
             catch (Exception ex)
             {
@@ -530,20 +538,21 @@ namespace ITP104PROJECT
             }
         }
 
-        
+
 
         private void DeleteTask()
         {
-            if(dgvProject.SelectedCells.Count == 0)
+            
+            if (dgvProject.SelectedCells.Count == 0)
             {
                 MessageBox.Show("Please select a task to delete.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
+          
             int selectedRowCell = dgvProject.SelectedCells[0].RowIndex;
             DataGridViewRow selectedRow = dgvProject.Rows[selectedRowCell];
-            string taskId = selectedRow.Cells[0].Value?.ToString();
-
+            string taskId = selectedRow.Cells[3].Value?.ToString(); 
             if (string.IsNullOrEmpty(taskId))
             {
                 MessageBox.Show("Invalid task selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -554,16 +563,27 @@ namespace ITP104PROJECT
             {
                 conn.Open();
 
+             
                 string query = "DELETE FROM task WHERE taskId = @id";
                 MySqlCommand command = new MySqlCommand(query, conn);
 
+              
                 command.Parameters.AddWithValue("@id", taskId);
 
-                command.ExecuteNonQuery();
+             
+                int rowsAffected = command.ExecuteNonQuery();
 
-                MessageBox.Show("Task deleted successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+              
+                if (rowsAffected > 0)
+                {
+                    MessageBox.Show("Task deleted successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("No matching task found to delete.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show("An error occurred: " + ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -575,6 +595,7 @@ namespace ITP104PROJECT
                 }
             }
         }
+
 
         private void UpdateTask()
         {
@@ -631,6 +652,40 @@ namespace ITP104PROJECT
                 }
             }
         }
-      
+
+        private bool IsProjectValid(string projectId)
+        {
+            bool isValid = false;
+
+            try
+            {
+                conn.Open();
+
+                string query = @"
+                    SELECT COUNT(*)
+                    FROM project
+                    WHERE projectId = @projectId AND status != 'Completed';";
+
+                MySqlCommand command = new MySqlCommand(query, conn);
+                command.Parameters.AddWithValue("@projectId", projectId);
+
+                int count = Convert.ToInt32(command.ExecuteScalar());
+                isValid = count > 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error validating project: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                if (conn.State == ConnectionState.Open)
+                {
+                    conn.Close();
+                }
+            }
+
+            return isValid;
+        }
+
     }
 }

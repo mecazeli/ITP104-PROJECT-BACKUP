@@ -295,7 +295,7 @@ namespace ITP104PROJECT
             string empAge = txtEmpAge.Text.Trim();
             string empEmail = txtEmpEmail.Text.Trim();
             string empPosition = txtEmpPosition.Text.Trim();
-            string empGender = cmbGender.SelectedIndex.ToString();
+            string empGender = GetSelectedGender();
             string depId = GetSelectedDepartmentId();
             string empSalary = txtEmpSalary.Text.Trim();
             DateTime dateHired = dateHiredPicker.Value;
@@ -553,6 +553,16 @@ namespace ITP104PROJECT
                 return null;
             }
             return comboEmpDep.SelectedValue.ToString();
+        }
+
+        private string GetSelectedGender()
+        {
+            if(cmbGender.SelectedIndex == -1 || cmbGender.SelectedItem == null)
+            {
+                return null;
+            }
+
+            return cmbGender.SelectedItem.ToString();
         }
 
 
