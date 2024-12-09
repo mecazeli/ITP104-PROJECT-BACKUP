@@ -61,6 +61,7 @@
             this.panel7.Name = "panel7";
             this.panel7.Size = new System.Drawing.Size(508, 68);
             this.panel7.TabIndex = 10;
+          
             // 
             // panel1
             // 
@@ -147,6 +148,7 @@
             this.label3.Size = new System.Drawing.Size(108, 18);
             this.label3.TabIndex = 14;
             this.label3.Text = "Employee Email:\r\n";
+          
             // 
             // label4
             // 
@@ -159,6 +161,7 @@
             this.label4.Size = new System.Drawing.Size(113, 18);
             this.label4.TabIndex = 15;
             this.label4.Text = "Employee Salary:\r\n";
+         
             // 
             // label5
             // 
@@ -171,6 +174,7 @@
             this.label5.Size = new System.Drawing.Size(123, 18);
             this.label5.TabIndex = 16;
             this.label5.Text = "Employee Position:\r\n";
+          
             // 
             // label6
             // 
@@ -183,6 +187,7 @@
             this.label6.Size = new System.Drawing.Size(147, 18);
             this.label6.TabIndex = 17;
             this.label6.Text = "Employee Department:\r\n";
+           
             // 
             // txtName
             // 
@@ -192,6 +197,7 @@
             this.txtName.Name = "txtName";
             this.txtName.Size = new System.Drawing.Size(248, 25);
             this.txtName.TabIndex = 26;
+           
             // 
             // txtEmail
             // 
@@ -201,6 +207,7 @@
             this.txtEmail.Name = "txtEmail";
             this.txtEmail.Size = new System.Drawing.Size(248, 25);
             this.txtEmail.TabIndex = 27;
+           
             // 
             // txtSalary
             // 
@@ -210,6 +217,7 @@
             this.txtSalary.Name = "txtSalary";
             this.txtSalary.Size = new System.Drawing.Size(248, 25);
             this.txtSalary.TabIndex = 28;
+           
             // 
             // txtPosition
             // 
@@ -219,6 +227,7 @@
             this.txtPosition.Name = "txtPosition";
             this.txtPosition.Size = new System.Drawing.Size(248, 25);
             this.txtPosition.TabIndex = 29;
+            
             // 
             // cbDepartment
             // 
@@ -229,6 +238,7 @@
             this.cbDepartment.Name = "cbDepartment";
             this.cbDepartment.Size = new System.Drawing.Size(248, 28);
             this.cbDepartment.TabIndex = 30;
+            
             // 
             // btnUpdate
             // 

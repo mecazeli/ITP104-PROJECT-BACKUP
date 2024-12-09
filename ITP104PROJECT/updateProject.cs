@@ -25,7 +25,6 @@ namespace ITP104PROJECT
 
         private void updateProject_Load(object sender, EventArgs e)
         {
-            SetDateTimePickerToNow();
         }
 
         private void SetDateTimePickerToNow()

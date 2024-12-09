@@ -244,7 +244,7 @@ namespace ITP104PROJECT
             FROM 
                 project p
             LEFT JOIN 
-                task t ON p.projectId = t.projectId;
+                task t ON p.projectId = t.projectId
              LEFT JOIN 
             department d ON p.departmentId = d.departmentId;
            ";
@@ -637,7 +637,8 @@ namespace ITP104PROJECT
 
         private void btnUpdateTask_Click(object sender, EventArgs e)
         {
-
+            updateTask updateTaskForm = new updateTask(this);
+            updateTaskForm.ShowDialog();
         }
 
         public bool IsTaskNameExits(string taskName)
