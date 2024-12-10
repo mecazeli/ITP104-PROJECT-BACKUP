@@ -15,9 +15,9 @@ namespace ITP104PROJECT
     public partial class Project : Form
     {
 
-        //public static string connection = "server=localhost; user=root; password=; database=company; port=3306";
+        public static string connection = "server=localhost; user=root; password=; database=company; port=3306";
         //public static string connection = "server=localhost; user=root; password=091203; database=company;";
-        public static string connection = "server=localhost; user=root; password=liezel11; database=company;";
+        //public static string connection = "server=localhost; user=root; password=liezel11; database=company;";
         public MySqlConnection conn;
         public Admin _admin;
 
@@ -123,6 +123,8 @@ namespace ITP104PROJECT
                 cbDepartment.ValueMember = "departmentId";
                 cbDepartment.DisplayMember = "departmentName";
 
+                cbDepartment.SelectedIndex = -1;
+
             }
             catch (Exception ex)
             {
@@ -155,6 +157,9 @@ namespace ITP104PROJECT
                 cbEmployee.DataSource = employees;
                 cbEmployee.ValueMember = "employeeId";
                 cbEmployee.DisplayMember = "employeeName";
+
+
+                cbEmployee.SelectedIndex = -1;
             }
             catch(Exception ex)
             {
@@ -179,7 +184,10 @@ namespace ITP104PROJECT
                 {
                     using (MySqlDataAdapter adapter = new MySqlDataAdapter(cmd))
                     {
-                        conn.Open();
+                        if (conn.State != ConnectionState.Open)
+                        {
+                            conn.Open();  
+                        }
                         adapter.Fill(projects);
                     }
                 }
@@ -187,6 +195,9 @@ namespace ITP104PROJECT
                 cbmProject.DataSource = projects;
                 cbmProject.ValueMember = "projectId";
                 cbmProject.DisplayMember = "projectName";
+
+                cbmProject.SelectedIndex = -1;
+
             }
             catch(Exception ex)
             {
@@ -300,10 +311,11 @@ namespace ITP104PROJECT
             }
         }
 
+
         private void AddProject()
         {
-            string projName = txtProjName.Text.Trim(); 
-            string selectedDepId = GetSelectedDepartmentId(); 
+            string projName = txtProjName.Text.Trim();
+            string selectedDepId = GetSelectedDepartmentId();
             DateTime targetDate = projectTargetDate.Value;
 
             if (string.IsNullOrEmpty(projName) || string.IsNullOrEmpty(selectedDepId))
@@ -312,9 +324,10 @@ namespace ITP104PROJECT
                 return;
             }
 
-            if (IsProjectNameExists(projName))
+            // Check if the project already exists in the selected department
+            if (IsProjectInSameDepartmentExists(projName, selectedDepId))
             {
-                MessageBox.Show("Project name already exists. Please choose a different name.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("A project with the same name already exists in this department.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -323,8 +336,8 @@ namespace ITP104PROJECT
                 conn.Open();
 
                 string query = @"
-                         INSERT INTO project (projectName, departmentId, startDate, endDate, status)
-                         VALUES (@projectName, @departmentId, @startDate, @endDate, 'Pending');";
+            INSERT INTO project (projectName, departmentId, startDate, endDate, status)
+            VALUES (@projectName, @departmentId, @startDate, @endDate, 'Pending');";
 
                 MySqlCommand command = new MySqlCommand(query, conn);
 
@@ -335,7 +348,7 @@ namespace ITP104PROJECT
 
                 command.ExecuteNonQuery();
                 MessageBox.Show("Project added successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-         
+                PopulateProjects();
 
                 txtProjName.Text = string.Empty;
                 cbDepartment.SelectedItem = -1;
@@ -350,10 +363,50 @@ namespace ITP104PROJECT
             {
                 if (conn.State == ConnectionState.Open)
                 {
-                    conn.Close();
+                    conn.Open();
                 }
             }
         }
+
+        // Method to check if a project with the same name already exists in the selected department
+        private bool IsProjectInSameDepartmentExists(string projectName, string departmentId)
+        {
+            // Ensure the connection is open before executing any queries
+            if (conn.State != ConnectionState.Open)
+            {
+                conn.Open(); // Open the connection if it's not already open
+            }
+
+            try
+            {
+                string query = @"
+            SELECT COUNT(*) 
+            FROM project 
+            WHERE projectName = @projectName AND departmentId = @departmentId;";
+
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@projectName", projectName);
+                cmd.Parameters.AddWithValue("@departmentId", departmentId);
+
+                int count = Convert.ToInt32(cmd.ExecuteScalar()); // Execute the query and get the count
+                return count > 0; // Returns true if the project already exists in the department
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error checking project existence: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                // Ensure that the connection is always closed after operation
+                if (conn.State == ConnectionState.Open)
+                {
+                    conn.Close(); // Close the connection
+                }
+            }
+        }
+
+
 
         private void DeleteProject()
         {
@@ -702,5 +755,61 @@ namespace ITP104PROJECT
             return isValid;
         }
 
+        private void btnSearch_Click(object sender, EventArgs e)
+        {
+            string searchTerm = txtSearch.Text.Trim();
+            if (string.IsNullOrEmpty(searchTerm))
+            {
+                MessageBox.Show("Please enter a search term.", "Search Input Required", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            SearchInDataGridView(searchTerm);
+        }
+
+        private void SearchInDataGridView(string searchTerm)
+        {
+            // Convert the search term to lower case for case-insensitive comparison
+            string lowerSearchTerm = searchTerm.ToLower();
+            bool anyMatchFound = false;
+
+            foreach (DataGridViewRow row in dgvProject.Rows)
+            {
+                // Skip the new row to avoid InvalidOperationException
+                if (row.IsNewRow)
+                {
+                    continue;
+                }
+
+                bool matchFound = false;
+
+                // Loop through all cells in the row
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    if (cell.Value != null && cell.Value.ToString().ToLower().Contains(lowerSearchTerm))
+                    {
+                        matchFound = true;
+                        break; // No need to check further if a match is found in any cell
+                    }
+                }
+
+                // If a match was found, make the row visible; otherwise, hide it
+                row.Visible = matchFound;
+                if (matchFound)
+                {
+                    anyMatchFound = true;
+                }
+            }
+
+            if (!anyMatchFound)
+            {
+                MessageBox.Show("No results found matching the search criteria.", "Search Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void panel7_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }

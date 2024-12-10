@@ -11,6 +11,7 @@ using System.Data.SqlClient;
 using ProjectName.My_Classes;
 using System.Diagnostics;
 using MySqlConnector;
+using System.IO;
 
 
 namespace ITP104PROJECT
@@ -28,12 +29,12 @@ namespace ITP104PROJECT
         {
             InitializeComponent();
             conn = new MySqlConnection(connection);
-            btnDashboard.Click += new EventHandler(btnSide_Click);
-            btnSideDep.Click += new EventHandler(btnSide_Click);
-            btnSideProj.Click += new EventHandler(btnSide_Click);
-            btnSideEmp.Click += new EventHandler(btnSide_Click);
-            btnSettings.Click += new EventHandler(btnSide_Click);
-            btnLogout.Click += new EventHandler(btnSide_Click);
+            //btnDashboard.Click += new EventHandler(btnSide_Click);
+            //btnSideDep.Click += new EventHandler(btnSide_Click);
+            //btnSideProj.Click += new EventHandler(btnSide_Click);
+            //btnSideEmp.Click += new EventHandler(btnSide_Click);
+            //btnSettings.Click += new EventHandler(btnSide_Click);
+            //btnLogout.Click += new EventHandler(btnSide_Click);
         }
         public Settings(Admin admin) : this()
         {
@@ -97,7 +98,7 @@ namespace ITP104PROJECT
         {
             try
             {
-                string mysqldumpPath = @"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqldump.exe";
+                string mysqldumpPath = @"C:\Program Files\MySQL\MySQL Workbench 8.0 CE\mysqldump.exe";
 
                 string command = $@"""{mysqldumpPath}"" --user=root --host=localhost company --result-file=""{backupFilePath}"" --no-tablespaces --skip-column-statistics";
 
@@ -195,13 +196,17 @@ namespace ITP104PROJECT
         {
             if (!string.IsNullOrEmpty(txtBackPath.Text))
              {
+                if (Path.GetExtension(txtBackPath.Text).ToLower() != ".sql")
+                {
+                    MessageBox.Show("The file must be a .sql file.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 RestoreDatabase(txtBackPath.Text);
             } else
             {
                 MessageBox.Show("Please Browse a Path for Restoring");
             }
-        
-            
 
         }
 
@@ -288,6 +293,11 @@ namespace ITP104PROJECT
             dt.Rows.Add(_admin.name, _admin.age, _admin.gender, _admin.username, _admin.password);
 
             dgvAdmin.DataSource = dt;
+        }
+
+        private void panel7_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

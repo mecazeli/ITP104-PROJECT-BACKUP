@@ -14,7 +14,8 @@ namespace ITP104PROJECT
     public partial class updateEmployee : Form
     {
         public Employees employees;
-        public static string connection = "server=localhost; user=root; password=liezel11; database=company;";
+        //public static string connection = "server=localhost; user=root; password=liezel11; database=company;";
+        public static string connection = "server=localhost; user=root; password=; database=company; port=3306";
         public updateEmployee(Employees employeeForm)
         {
             InitializeComponent();
@@ -65,18 +66,33 @@ namespace ITP104PROJECT
                 try
                 {
                     conn.Open();
-                    string query = "SELECT email, salary, position, departmentId FROM employee WHERE employeeId = @empId";
+                    string query = "SELECT employeeName, email, salary, position, departmentId FROM employee WHERE employeeId = @empId";
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@empId", empId);
                         using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
                             if (reader.Read())
+
+
                             {
+
+                                txtName.Enabled = true;
+                                txtEmail.Enabled = true;
+                                txtSalary.Enabled = true;
+                                txtPosition.Enabled = true;
+                                cbDepartment.Enabled = true;
+                                btnUpdate.Enabled = true;
+
+
+
+                                txtName.Text = reader["employeeName"].ToString();
                                 txtEmail.Text = reader["email"].ToString();
                                 txtSalary.Text = reader["salary"].ToString();
                                 txtPosition.Text = reader["position"].ToString();
                                 cbDepartment.SelectedValue = reader["departmentId"].ToString();
+
+
                             }
                             else
                             {

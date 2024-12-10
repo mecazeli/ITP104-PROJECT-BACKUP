@@ -7,8 +7,8 @@ namespace ITP104PROJECT
 {
     public partial class Departments : Form
     {
-        //public static string connection = "server=localhost; user=root; password=; database=company; port=3306";
-        public static string connection = "server=localhost; user=root; password=liezel11; database=company;";
+        public static string connection = "server=localhost; user=root; password=; database=company; port=3306";
+        //public static string connection = "server=localhost; user=root; password=liezel11; database=company;";
         //public static string connection = "server=localhost; user=root; password=091203; database=company";
         public MySqlConnection conn;
         public Admin _admin;
@@ -162,7 +162,7 @@ namespace ITP104PROJECT
                 }
             }
         }
- 
+
         private void AddingDepartment()
         {
             string depName = txtDepName.Text.Trim();
@@ -189,13 +189,11 @@ namespace ITP104PROJECT
                 command.Parameters.AddWithValue("@name", depName);
                 command.Parameters.AddWithValue("@description", depDescription);
 
-               
                 command.ExecuteNonQuery();
                 MessageBox.Show("Department added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                depName = string.Empty;
-                depDescription = string.Empty;
-
+                txtDepName.Clear();
+                txtDescription.Clear();
             }
             catch (Exception ex)
             {
@@ -241,6 +239,7 @@ namespace ITP104PROJECT
                 command.ExecuteNonQuery();
 
                 MessageBox.Show("Department deleted successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
 
             }
             catch (Exception ex)
@@ -431,9 +430,9 @@ namespace ITP104PROJECT
 
                 // Use a parameterized query to prevent SQL injection
                 string query = @"
-            SELECT 
-                departmentId, departmentName
-            FROM department";
+    SELECT 
+        departmentId, departmentName, description
+    FROM department";
 
                 using (MySqlCommand command = new MySqlCommand(query, conn))
                 {
@@ -441,12 +440,21 @@ namespace ITP104PROJECT
                     {
                         while (reader.Read())
                         {
-                            // Check if the department name contains the search term (case-insensitive)
-                            if (reader["departmentName"].ToString().ToLower().Contains(lowerSearchTerm))
+                            // Convert departmentId to string to enable comparison with the search term
+                            string departmentId = reader["departmentId"].ToString();
+                            string departmentName = reader["departmentName"].ToString();
+                            string description = reader["description"].ToString();
+
+                            // Check if the departmentId, departmentName, or description contains the search term (case-insensitive)
+                            if (departmentId.Contains(searchTerm) ||
+                                departmentName.ToLower().Contains(lowerSearchTerm) ||
+                                description.ToLower().Contains(lowerSearchTerm))
                             {
+                                // Add departmentId, departmentName, and description to the DataGridView
                                 dgvDepartments.Rows.Add(
-                                    reader["departmentId"],
-                                    reader["departmentName"]
+                                    departmentId,
+                                    departmentName,
+                                    description
                                 );
                             }
                         }
@@ -471,5 +479,9 @@ namespace ITP104PROJECT
             }
         }
 
+        private void panel7_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }

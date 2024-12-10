@@ -16,5 +16,10 @@ namespace ITP104PROJECT
         {
             InitializeComponent();
         }
+
+        private void Task_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

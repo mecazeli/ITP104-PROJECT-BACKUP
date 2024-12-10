@@ -16,9 +16,9 @@ namespace ITP104PROJECT
     {
 
         public Admin _admin;
-        public static string connection = "server=localhost; user=root; password=liezel11; database=company;";
+        //public static string connection = "server=localhost; user=root; password=liezel11; database=company;";
         //public static string connection = "server=localhost; user=root; password=091203; database=company";
-        //public static string connection = "server=localhost; user=root; password=; database=company; port=3306";
+        public static string connection = "server=localhost; user=root; password=; database=company; port=3306";
         public MySqlConnection conn;
         public Employees()
         {
@@ -114,9 +114,11 @@ namespace ITP104PROJECT
                 comboEmpDep.DataSource = dep;
                 comboEmpDep.ValueMember = "departmentId";   
                 comboEmpDep.DisplayMember = "departmentName";
+                comboEmpDep.SelectedIndex = -1;
+
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show($"Error populating departments: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -464,6 +466,7 @@ namespace ITP104PROJECT
 
             // Convert the search term to lower case for case-insensitive comparison
             string lowerSearchTerm = searchTerm.ToLower();
+            bool foundResults = false;
 
             try
             {
@@ -471,11 +474,11 @@ namespace ITP104PROJECT
 
                 // Use a parameterized query to prevent SQL injection
                 string query = @"
-            SELECT 
-                e.employeeId, e.employeeName, e.age, e.gender, e.address,
-                e.email, e.position, e.datehired, e.salary, d.departmentName
-            FROM employee e
-            JOIN department d ON e.departmentId = d.departmentId";
+    SELECT 
+        e.employeeId, e.employeeName, e.age, e.gender, e.address,
+        e.email, e.position, e.datehired, e.salary, d.departmentName
+    FROM employee e
+    JOIN department d ON e.departmentId = d.departmentId";
 
                 using (MySqlCommand command = new MySqlCommand(query, conn))
                 {
@@ -495,6 +498,8 @@ namespace ITP104PROJECT
                                 reader["salary"].ToString().ToLower().Contains(lowerSearchTerm) ||
                                 reader["departmentName"].ToString().ToLower().Contains(lowerSearchTerm))
                             {
+                                foundResults = true; // Found a match, set the flag
+
                                 string formattedSalary = "₱" + Convert.ToDecimal(reader["salary"]).ToString("N2");
 
                                 dgvEmployees.Rows.Add(
@@ -514,7 +519,8 @@ namespace ITP104PROJECT
                     }
                 }
 
-                if (dgvEmployees.Rows.Count == 0)
+                // Show message if no matching results are found
+                if (!foundResults)
                 {
                     MessageBox.Show("No employees found matching the search criteria.", "Search Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
@@ -532,6 +538,10 @@ namespace ITP104PROJECT
             }
         }
 
+        private void panel7_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }
      

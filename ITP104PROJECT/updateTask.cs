@@ -15,7 +15,8 @@ namespace ITP104PROJECT
     public partial class updateTask : Form
     {
         public Project tasks;
-        public static string connection = "server=localhost; user=root; password=liezel11; database=company;";
+        //public static string connection = "server=localhost; user=root; password=liezel11; database=company;";
+        public static string connection = "server=localhost; user=root; password=; database=company; port=3306";
         public updateTask(Project taskForm)
         {
             InitializeComponent();
@@ -106,7 +107,7 @@ namespace ITP104PROJECT
                 try
                 {
                     conn.Open();
-                    string query = "SELECT endDate, deadline, employeeId FROM task WHERE taskId = @taskId";
+                    string query = "SELECT deadline, employeeId FROM task WHERE taskId = @taskId";
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@taskId", taskId);
@@ -114,6 +115,10 @@ namespace ITP104PROJECT
                         {
                             if (reader.Read())
                             {
+                                dateTimePicker.Enabled= true;
+                                cbProject.Enabled= true;
+                                cbEmployee.Enabled= true;
+
                                 dateTimePicker.Value = Convert.ToDateTime(reader["deadline"]);
                                 cbProject.SelectedValue = reader["projectId"].ToString();
                                 cbEmployee.SelectedValue = reader["employeeId"].ToString();
@@ -201,6 +206,11 @@ namespace ITP104PROJECT
                     MessageBox.Show($"Error updating task: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private void panel7_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

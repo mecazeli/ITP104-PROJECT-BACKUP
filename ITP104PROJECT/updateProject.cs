@@ -14,7 +14,8 @@ namespace ITP104PROJECT
     public partial class updateProject : Form
     {
         public Project project;
-        public static string connection = "server=localhost; user=root; password=liezel11; database=company;";
+        //public static string connection = "server=localhost; user=root; password=liezel11; database=company;";
+        public static string connection = "server=localhost; user=root; password=; database=company; port=3306";
         public updateProject(Project projectForm)
         {
             InitializeComponent();
@@ -84,7 +85,12 @@ namespace ITP104PROJECT
                         using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
                             if (reader.Read())
+
                             {
+                                dateTimePicker.Enabled = true;
+                                cbDepartment.Enabled = true;    
+                                btnSearch.Enabled = true;
+
                                 dateTimePicker.Value = Convert.ToDateTime(reader["startDate"]);
                                 cbDepartment.SelectedValue = reader["departmentId"].ToString();
                             }
